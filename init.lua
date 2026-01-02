@@ -6,6 +6,8 @@ vim.cmd([[
   set softtabstop=2
   set shiftwidth=2
   set clipboard=unnamedplus
+  filetype indent off
+  filetype plugin off
   colorscheme habamax 
 ]])
 
@@ -30,8 +32,17 @@ vim.lsp.config['bash_ls'] = {
   root_markers = { '.git' },
 }
 vim.lsp.config['c_ls'] = {
-  cmd = {'clang'},
-  filetypes = {'c','cpp','h'},
+  cmd = { 'ccls' },
+  filetypes = { 'c', 'cpp', 'objc', 'objcpp', 'cuda' },
+  root_markers = { 'compile_commands.json', '.ccls', '.git' },
+  offset_encoding = 'utf-32',
+  -- ccls does not support sending a null root directory
+  workspace_required = true,
+  on_attach = function(client, bufnr)
+    vim.api.nvim_buf_create_user_command(bufnr, 'LspCclsSwitchSourceHeader', function()
+      switch_source_header(client, bufnr)
+    end, { desc = 'Switch between source/header' })
+  end,
 }
 vim.lsp.config['cmake_ls'] = {
   cmd = { 'cmake-language-server' },
@@ -108,10 +119,6 @@ vim.lsp.config['systemverilog_ls'] = {
   cmd = {'svls'},
   filetypes = {'sv'},
 }
-vim.lsp.config['rust_ls'] = {
-  cmd = {'rust-analyzer'},
-  filetypes = {'rs'},
-}
 vim.lsp.config['tex_ls'] = {
   cmd = {'texlab'},
   filetypes = {'tex'},
@@ -129,8 +136,5 @@ vim.lsp.enable('json_ls')
 vim.lsp.enable('lua_ls')
 vim.lsp.enable('python_ls')
 vim.lsp.enable('systemverilog_ls')
-vim.lsp.enable('rust_ls')
 vim.lsp.enable('tex_ls')
-
-
 
