@@ -1,15 +1,22 @@
-
+local opt = vim.opt
+local lsp = vim.lsp
 -- VIM API Commands
 vim.cmd([[
-  set expandtab
-  set tabstop=2
-  set softtabstop=2
-  set shiftwidth=2
+  set tabstop=4
+  set softtabstop=4
+  set shiftwidth=4
   set clipboard=unnamedplus
-  filetype indent off
-  filetype plugin off
-  colorscheme habamax 
+  filetype indent on
+  filetype plugin on
+  colorscheme habamax
 ]])
+vim.cmd [[set completeopt+=menuone,noselect,popup]]
+opt.number = true
+opt.relativenumber = true
+opt.scroll = 10
+opt.scrolloff = 10
+opt.cmdheight = 1
+opt.completeopt = "fuzzy", "menuone"
 
 vim.g.mapleader = " "
 
@@ -21,120 +28,106 @@ require("lazy").setup("plugins")
 
 
 
-vim.lsp.config['bash_ls'] = {
-  cmd = { 'bash-language-server', 'start' },
-  settings = {
-    bashIde = {
-      globPattern = vim.env.GLOB_PATTERN or '*@(.sh|.inc|.bash|.command)',
-    },
-  },
-  filetypes = { 'bash', 'sh' },
-  root_markers = { '.git' },
+lsp.config['bash_ls'] = {
+	cmd = { 'bash-language-server', 'start' },
+	settings = {
+		bashIde = {
+			globPattern = vim.env.GLOB_PATTERN or '*@(.sh|.inc|.bash|.command)',
+		},
+	},
+	filetypes = { 'bash', 'sh' },
+	root_markers = { '.git' },
 }
-vim.lsp.config['c_ls'] = {
-  cmd = { 'ccls' },
-  filetypes = { 'c', 'cpp', 'objc', 'objcpp', 'cuda' },
-  root_markers = { 'compile_commands.json', '.ccls', '.git' },
-  offset_encoding = 'utf-32',
-  -- ccls does not support sending a null root directory
-  workspace_required = true,
-  on_attach = function(client, bufnr)
-    vim.api.nvim_buf_create_user_command(bufnr, 'LspCclsSwitchSourceHeader', function()
-      switch_source_header(client, bufnr)
-    end, { desc = 'Switch between source/header' })
-  end,
+lsp.config['cmake_ls'] = {
+	cmd = { 'cmake-language-server' },
+	filetypes = { 'cmake' },
+	root_markers = { 'CMakePresets.json', 'CTestConfig.cmake', '.git', 'build', 'cmake' },
+	init_options = {
+		buildDirectory = 'build',
+	},
 }
-vim.lsp.config['cmake_ls'] = {
-  cmd = { 'cmake-language-server' },
-  filetypes = { 'cmake' },
-  root_markers = { 'CMakePresets.json', 'CTestConfig.cmake', '.git', 'build', 'cmake' },
-  init_options = {
-    buildDirectory = 'build',
-  },
+lsp.config['css_ls'] = {
+	cmd = { 'vscode-css-language-server', '--stdio' },
+	filetypes = { 'css', 'scss', 'less' },
+	init_options = { provideFormatter = true },
+	root_markers = { 'package.json', '.git' },
+	settings = {
+		css = { validate = true },
+		scss = { validate = true },
+		less = { validate = true },
+	},
 }
-vim.lsp.config['css_ls'] = {
-  cmd = { 'vscode-css-language-server', '--stdio' },
-  filetypes = { 'css', 'scss', 'less' },
-  init_options = { provideFormatter = true },
-  root_markers = { 'package.json', '.git' },
-  settings = {
-    css = { validate = true },
-    scss = { validate = true },
-    less = { validate = true },
-  },
+lsp.config['fortran_ls'] = {
+	cmd = { 'fortran-language-server' },
+	filetypes = { 'for' },
 }
-vim.lsp.config['fortran_ls'] = {
-  cmd = {'fortran-language-server'},
-  filetypes = {'for'},
+lsp.config['go_ls'] = {
+	cmd = { 'gopls' },
+	filetypes = { 'go' },
 }
-vim.lsp.config['go_ls'] = {
-  cmd = {'gopls'},
-  filetypes = {'go'},
+lsp.config['html_ls'] = {
+	cmd = { 'vscode-html-language-server', '--stdio' },
+	filetypes = { 'html', 'templ' },
+	root_markers = { 'package.json', '.git' },
+	settings = {},
+	init_options = {
+		provideFormatter = true,
+		embeddedLanguages = { css = true, javascript = true },
+		configurationSection = { 'html', 'css', 'javascript' },
+	},
 }
-vim.lsp.config['html_ls'] = {
-  cmd = { 'vscode-html-language-server', '--stdio' },
-  filetypes = { 'html', 'templ' },
-  root_markers = { 'package.json', '.git' },
-  settings = {},
-  init_options = {
-    provideFormatter = true,
-    embeddedLanguages = { css = true, javascript = true },
-    configurationSection = { 'html', 'css', 'javascript' },
-  },
+lsp.config['json_ls'] = {
+	cmd = { 'vscode-json-language-server', '--stdio' },
+	filetypes = { 'json', 'jsonc' },
+	init_options = {
+		provideFormatter = true,
+	},
+	root_markers = { '.git' },
 }
-vim.lsp.config['json_ls'] = {
- cmd = { 'vscode-json-language-server', '--stdio' },
-  filetypes = { 'json', 'jsonc' },
-  init_options = {
-    provideFormatter = true,
-  },
-  root_markers = { '.git' },
+lsp.config['python_ls'] = {
+	cmd = { 'python-lsp-server' },
+	filetypes = { 'py' },
 }
-vim.lsp.config['lua_ls'] = {
-  cmd = { 'lua-language-server' },
-  filetypes = { 'lua' },
-  root_markers = {
-    '.emmyrc.json',
-    '.luarc.json',
-    '.luarc.jsonc',
-    '.luacheckrc',
-    '.stylua.toml',
-    'stylua.toml',
-    'selene.toml',
-    'selene.yml',
-    '.git',
-  },
-  settings = {
-    Lua = {
-      codeLens = { enable = true },
-      hint = { enable = true, semicolon = 'Disable' },
-    },
-  },
+lsp.config['systemverilog_ls'] = {
+	cmd = { 'svls' },
+	filetypes = { 'sv' },
 }
-vim.lsp.config['python_ls'] = {
-  cmd = {'python-lsp-server'},
-  filetypes = {'py'},
+lsp.config['tex_ls'] = {
+	cmd = { 'texlab' },
+	filetypes = { 'tex' },
 }
-vim.lsp.config['systemverilog_ls'] = {
-  cmd = {'svls'},
-  filetypes = {'sv'},
+lsp.config.rust_analyzer = {
+	on_attach = on_attach,
+	capabilities = capabilities,
+	cmd = { 'rust-analyzer' },
+	filetypes = { 'rust' },
+	root_markers = { "Cargo.toml", ".git" },
+	single_file_support = true,
+	settings = {
+		['rust-analyzer'] = {
+			diagnostics = {
+				enable = true,
+			}
+		}
+	},
+	before_init = function(init_params, config)
+		-- See https://github.com/rust-lang/rust-analyzer/blob/eb5da56d839ae0a9e9f50774fa3eb78eb0964550/docs/dev/lsp-extensions.md?plain=1#L26
+		if config.settings and config.settings['rust-analyzer'] then
+			init_params.initializationOptions = config.settings['rust-analyzer']
+		end
+	end,
 }
-vim.lsp.config['tex_ls'] = {
-  cmd = {'texlab'},
-  filetypes = {'tex'},
-}
+lsp.enable("rust_analyzer")
+lsp.enable('c_ls')
+lsp.enable('lua_ls')
 
-
-vim.lsp.enable('bash_ls')
-vim.lsp.enable('c_ls')
-vim.lsp.enable('cmake_ls')
-vim.lsp.enable('css_ls')
-vim.lsp.enable('fortran_ls')
-vim.lsp.enable('go_ls')
-vim.lsp.enable('html_ls')
-vim.lsp.enable('json_ls')
-vim.lsp.enable('lua_ls')
-vim.lsp.enable('python_ls')
-vim.lsp.enable('systemverilog_ls')
-vim.lsp.enable('tex_ls')
-
+lsp.enable('bash_ls')
+lsp.enable('cmake_ls')
+lsp.enable('css_ls')
+lsp.enable('fortran_ls')
+lsp.enable('go_ls')
+lsp.enable('html_ls')
+lsp.enable('json_ls')
+lsp.enable('python_ls')
+lsp.enable('systemverilog_ls')
+lsp.enable('tex_ls')

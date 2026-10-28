@@ -7,8 +7,8 @@ return {
         theme = 'codedark',
       },
       tabline = {
-        lualine_a = {'buffers'},
-        lualine_b = {},
+        lualine_a = {'filename'},
+        lualine_b = {'tabs'},
         lualine_c = {},
         lualine_x = {},
         lualine_y = {'filesize'},
